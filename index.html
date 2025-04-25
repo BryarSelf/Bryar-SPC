@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bryar's SPC Outlook</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Bryar's SPC Outlook</h1>
+        <p>Latest Storm Prediction Center Outlooks</p>
+        <p id="nextOutlook"></p>
+    </header>
+
+    <section id="outlook">
+        <h2 id="day1Header" class="outlook-category">Day 1 Outlook</h2>
+        <div id="day1Outlook" class="outlook-content">
+            <div id="day1Tornado"></div>
+            <div id="day1Wind"></div>
+            <div id="day1Hail"></div>
+        </div>
+
+        <h2 id="day2Header" class="outlook-category">Day 2 Outlook</h2>
+        <div id="day2Outlook" class="outlook-content">
+            <div id="day2Tornado"></div>
+            <div id="day2Wind"></div>
+            <div id="day2Hail"></div>
+        </div>
+
+        <h2>Day 3 Outlook</h2>
+        <div id="day3Outlook"></div>
+
+        <h2>Day 4-8 Outlook</h2>
+        <div id="day48Outlook"></div>
+    </section>
+
+    <script>
+        // Set up the API URL for the SPC Outlook (this is a placeholder)
+        const apiUrl = "https://api.spc.noaa.gov/products/outlook"; // Replace with actual URL if available
+
+        // Fetch the outlook data from the SPC
+        function fetchOutlooks() {
+            axios.get(apiUrl)
+                .then(response => {
+                    const outlookData = response.data;
+                    const nextOutlookTime = new Date(outlookData.nextOutlookTime); // Adjust with the correct field
+                    const now = new Date();
+                    const timeDifference = nextOutlookTime - now;
+
+                    // Display the time until the next outlook
+                    document.getElementById("nextOutlook").innerText = "Next SPC Outlook will be issued in " + formatTime(timeDifference);
+
+                    // Display Day 1 Outlook Details
+                    document.getElementById("day1Tornado").innerHTML = generateOutlookHTML(outlookData.day1.tornadoRisk);
+                    document.getElementById("day1Wind").innerHTML = generateOutlookHTML(outlookData.day1.windRisk);
+                    document.getElementById("day1Hail").innerHTML = generateOutlookHTML(outlookData.day1.hailRisk);
+
+                    // Display Day 2 Outlook Details
+                    document.getElementById("day2Tornado").innerHTML = generateOutlookHTML(outlookData.day2.tornadoRisk);
+                    document.getElementById("day2Wind").innerHTML = generateOutlookHTML(outlookData.day2.windRisk);
+                    document.getElementById("day2Hail").innerHTML = generateOutlookHTML(outlookData.day2.hailRisk);
+
+                    // Display Day 3 and Day 4-8 Outlooks (you can update these similarly)
+                    document.getElementById("day3Outlook").innerHTML = generateOutlookHTML(outlookData.day3);
+                    document.getElementById("day48Outlook").innerHTML = generateOutlookHTML(outlookData.day48);
+                })
+                .catch(error => console.error("Error fetching data: ", error));
+        }
+
+        // Helper function to format time difference
+        function formatTime(ms) {
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+            return hours + " hours and " + minutes + " minutes";
+        }
+
+        // Helper function to generate HTML for an outlook (tornado, wind, hail)
+        function generateOutlookHTML(outlook) {
+            return `
+                <p><strong>Risk:</strong> ${outlook.risk}</p>
+                <p><strong>Category:</strong> ${outlook.category}</p>
+                <img src="${outlook.imageUrl}" alt="Outlook Image" style="max-width: 100%; height: auto;">
+            `;
+        }
+
+        // Toggle visibility of the outlook content when clicked
+        document.getElementById("day1Header").addEventListener("click", function() {
+            toggleVisibility("day1Outlook");
+        });
+
+        document.getElementById("day2Header").addEventListener("click", function() {
+            toggleVisibility("day2Outlook");
+        });
+
+        // Toggle function to show/hide the outlook content
+        function toggleVisibility(id) {
+            const content = document.getElementById(id);
+            content.style.display = (content.style.display === "none" || content.style.display === "") ? "block" : "none";
+        }
+
+        // Call the function to load the outlook data
+        fetchOutlooks();
+    </script>
+</body>
+</html>
